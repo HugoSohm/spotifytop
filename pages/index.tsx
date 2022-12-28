@@ -7,17 +7,23 @@ import { LoginWithSpotify } from '../components/LoginWithSpotify'
 import { TopButtons } from '../components/TopButtons'
 import { TopType } from '../lib/topTypes'
 
+type Props = {
+  jwt: string
+  apiUrl: string
+}
+
 export async function getServerSideProps(context: GetServerSidePropsContext) {
   const jwt = context.req.cookies.spotifytop_jwt
 
   return {
     props: {
       jwt: jwt ? jwt : null,
+      apiUrl: process.env.API_URL,
     },
   }
 }
 
-export default function Home(props: { jwt: string }) {
+export default function Home(props: Props) {
   const [pictureUrl, setPictureUrl] = useState<string>(
     null as unknown as string
   )
@@ -38,7 +44,7 @@ export default function Home(props: { jwt: string }) {
 
     try {
       const res = await fetch(
-        `http://localhost:8080/top/${topType}?access_token=${props.jwt}`
+        `${props.apiUrl}/top/${topType}?access_token=${props.jwt}`
       )
       setPictureUrl(res.url)
       setOpen(true)
@@ -66,7 +72,7 @@ export default function Home(props: { jwt: string }) {
         {props.jwt ? (
           <TopButtons fetchData={fetchData} />
         ) : (
-          <LoginWithSpotify />
+          <LoginWithSpotify apiUrl={props.apiUrl} />
         )}
         <Modal
           cancelButtonRef={cancelButtonRef}
